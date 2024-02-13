@@ -1,0 +1,20 @@
+FROM ubuntu:20.04
+
+# Установка зависимостей и копирование исходного кода
+COPY ./src /app
+
+# Установка Node.js и npm
+RUN apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive \
+    TZ=Europe/Moscow \
+    apt-get install -y nodejs npm
+
+# Установка зависимостей проекта
+WORKDIR /app
+RUN npm install
+
+# Запуск команды npm при запуске контейнера
+ENTRYPOINT ["npm"]
+
+# Аргументы для команды npm при запуске контейнера
+CMD ["run", "prod"]

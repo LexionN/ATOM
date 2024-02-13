@@ -1,0 +1,47 @@
+---
+- name: Установка и настройка Prometheus с PostgreSQL на Debian 11
+  hosts: localhost
+  become: yes
+  vars:
+    prometheus_db_name: "prometheus"
+    prometheus_db_user: "prometheus"
+    prometheus_db_password: "password"
+  tasks:
+    - name: Установка pip3
+      apt: name=python3-pip state=present
+
+    - name: Проверяем что psycopg2 установлен
+      pip:
+        name: psycopg2
+        state: present
+
+    - name: Установка PostgreSQL
+      apt:
+        name: postgresql
+        state: present
+
+    - name: Создание базы данных PostgreSQL
+      become_user: postgres
+      postgresql_db:
+        name: "{{ prometheus_db_name }}"
+        state: present
+
+    - name: Создание пользователя PostgreSQL
+      become_user: postgres
+      postgresql_user:
+        name: "{{ prometheus_db_user }}"
+        password: "{{ prometheus_db_password }}"
+        encrypted: yes
+        state: present
+
+    - name: Установка Prometheus
+      apt:
+        name: prometheus
+        state: present
+        update_cache: yes
+
+    - name: Запуск службы Prometheus
+      service:
+        name: prometheus
+        state: started
+        enabled: yes
